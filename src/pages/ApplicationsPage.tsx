@@ -20,6 +20,14 @@ import {
   XCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface PopulatedApplication extends Omit<IApplication, 'jobId'> {
   _id: string;
@@ -29,6 +37,8 @@ interface PopulatedApplication extends Omit<IApplication, 'jobId'> {
 const ApplicationsPage = () => {
   const [applications, setApplications] = useState<PopulatedApplication[]>([]);
   const [loading, setLoading] = useState(true);
+  const [withdrawingId, setWithdrawingId] = useState<string | null>(null);
+  const [showWithdrawConfirm, setShowWithdrawConfirm] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const user = useAuthStore(state => state.user);
@@ -57,13 +67,18 @@ const ApplicationsPage = () => {
     }
   };
 
-  const handleWithdraw = async (applicationId: string) => {
-    if (!user) return;
+  const handleWithdrawClick = (applicationId: string) => {
+    setWithdrawingId(applicationId);
+    setShowWithdrawConfirm(true);
+  };
+
+  const handleWithdrawConfirm = async () => {
+    if (!user || !withdrawingId) return;
 
     try {
-      const success = await withdrawApplication(applicationId, user.uid);
+      const success = await withdrawApplication(withdrawingId, user.uid);
       if (success) {
-        setApplications(prev => prev.filter(app => app._id !== applicationId));
+        setApplications(prev => prev.filter(app => app._id !== withdrawingId));
         toast({
           title: "Application withdrawn",
           description: "Your application has been withdrawn successfully"
@@ -81,6 +96,9 @@ const ApplicationsPage = () => {
         description: "Failed to withdraw application",
         variant: "destructive"
       });
+    } finally {
+      setShowWithdrawConfirm(false);
+      setWithdrawingId(null);
     }
   };
 
@@ -88,6 +106,10 @@ const ApplicationsPage = () => {
     navigate('/login');
     return null;
   }
+
+  const currentApplication = withdrawingId 
+    ? applications.find(app => app._id === withdrawingId)
+    : null;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
@@ -183,7 +205,7 @@ const ApplicationsPage = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleWithdraw(application._id)}
+                        onClick={() => handleWithdrawClick(application._id)}
                         className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                       >
                         <XCircle size={16} className="mr-1" />
@@ -196,21 +218,51 @@ const ApplicationsPage = () => {
             ))}
           </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-            <div className="flex justify-center mb-4">
-              <Briefcase size={48} className="text-gray-400" />
-            </div>
-            <h2 className="text-xl font-semibold mb-2 dark:text-white">No applications yet</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              You haven't applied to any jobs yet. Browse available opportunities to get started.
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No applications yet</h3>
+            <p className="mt-2 text-gray-500 dark:text-gray-400">
+              Start applying for jobs to see your applications here
             </p>
-            <Button onClick={() => navigate('/jobs')} className="inline-flex items-center gap-2">
-              <Briefcase size={16} />
+            <Button
+              onClick={() => navigate('/jobs')}
+              className="mt-4"
+            >
               Browse Jobs
             </Button>
           </div>
         )}
       </div>
+
+      <Dialog open={showWithdrawConfirm} onOpenChange={setShowWithdrawConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Withdraw Application</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to withdraw your application for{' '}
+              <span className="font-medium">{currentApplication?.jobId.title}</span> at{' '}
+              <span className="font-medium">{currentApplication?.jobId.company}</span>?
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex space-x-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowWithdrawConfirm(false);
+                setWithdrawingId(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleWithdrawConfirm}
+            >
+              Withdraw Application
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

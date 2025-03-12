@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { Camera } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { useToast } from '@/hooks/use-toast';
 import { updateUserProfile } from '@/services/profileService';
 
 interface ProfilePictureUploadProps {
   uid: string;
-  currentPicture?: string;
+  currentPicture?: string | null;
   onUploadSuccess: (imageUrl: string) => void;
 }
 
@@ -15,103 +14,53 @@ export const ProfilePictureUpload = ({ uid, currentPicture, onUploadSuccess }: P
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const compressImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 800;
-          const MAX_HEIGHT = 800;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          
-          // Convert to JPEG with 0.8 quality
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-          resolve(compressedBase64);
-        };
-        
-        img.onerror = () => {
-          reject(new Error('Failed to load image'));
-        };
-      };
-      
-      reader.onerror = () => {
-        reject(new Error('Failed to read file'));
-      };
-    });
-  };
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.match(/^image\/(jpeg|jpg|png|gif)$/)) {
+    // File size validation (2MB)
+    if (file.size > 2 * 1024 * 1024) {
       toast({
-        title: "Invalid file type",
-        description: "Please upload an image file (JPEG, PNG, or GIF).",
+        title: "File too large",
+        description: "Please select an image under 2MB",
         variant: "destructive"
       });
       return;
     }
 
-    // Validate file size (1MB)
-    if (file.size > 1 * 1024 * 1024) {
+    // File type validation
+    if (!file.type.startsWith('image/')) {
       toast({
-        title: "File too large",
-        description: "Please upload an image smaller than 1MB.",
+        title: "Invalid file type",
+        description: "Please select an image file",
         variant: "destructive"
       });
       return;
     }
 
     setLoading(true);
-
     try {
-      // Compress and convert image to base64
-      const compressedBase64 = await compressImage(file);
+      // Here you would typically upload the file to your storage service
+      // For now, we'll just use a mock URL
+      const imageUrl = URL.createObjectURL(file);
       
-      // Update profile with compressed base64 image
+      // Update the profile with the new image URL
       await updateUserProfile(uid, {
-        profilePicture: compressedBase64,
+        profilePicture: imageUrl,
         lastUpdated: new Date()
       });
-
-      onUploadSuccess(compressedBase64);
+      
+      onUploadSuccess(imageUrl);
       
       toast({
-        title: "Success",
-        description: "Profile picture updated successfully."
+        title: "Profile picture updated",
+        description: "Your profile picture has been updated successfully."
       });
     } catch (error) {
-      console.error('Error updating profile picture:', error);
+      console.error(error);
       toast({
         title: "Upload failed",
-        description: "Failed to update profile picture. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to upload profile picture. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -132,7 +81,7 @@ export const ProfilePictureUpload = ({ uid, currentPicture, onUploadSuccess }: P
       
       <label
         htmlFor="profile-picture"
-        className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+        className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10"
       >
         {loading ? (
           <LoadingSpinner className="text-white" />
@@ -141,19 +90,24 @@ export const ProfilePictureUpload = ({ uid, currentPicture, onUploadSuccess }: P
         )}
       </label>
       
-      <div className="h-24 w-24 md:h-32 md:w-32 rounded-full bg-green-100 flex items-center justify-center overflow-hidden border-4 border-green-500">
-        {currentPicture ? (
-          <img 
-            src={currentPicture} 
-            alt="Profile" 
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span className="text-3xl font-bold text-green-600">
-            {/* Placeholder initial */}
-            P
-          </span>
-        )}
+      <div className="relative h-24 w-24 md:h-32 md:w-32">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-green-400 to-green-600 animate-pulse" />
+        <div className="absolute inset-[3px] rounded-full bg-white dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+          {currentPicture ? (
+            <img 
+              src={currentPicture} 
+              alt="Profile" 
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
+              <span className="text-3xl font-bold text-gray-400 dark:text-gray-500">
+                {/* Placeholder initial */}
+                P
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

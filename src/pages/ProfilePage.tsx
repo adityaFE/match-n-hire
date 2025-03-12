@@ -36,6 +36,7 @@ const ProfilePage = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const [profile, setProfile] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [lastUpdatedSection, setLastUpdatedSection] = useState<string | null>(null);
   
   // References for scrolling to sections
   const summaryRef = useRef(null);
@@ -55,8 +56,32 @@ const ProfilePage = () => {
     }
   }, [user]);
 
-  const loadUserProfile = async () => {
+  // Effect to handle scrolling after profile updates
+  useEffect(() => {
+    if (lastUpdatedSection && !profileLoading) {
+      const sectionRefs = {
+        'summary': summaryRef,
+        'skills': skillsRef,
+        'employment': employmentRef,
+        'education': educationRef,
+        'projects': projectsRef,
+        'resume': resumeRef
+      };
+      
+      const ref = sectionRefs[lastUpdatedSection];
+      if (ref?.current) {
+        ref.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      setLastUpdatedSection(null);
+    }
+  }, [profile, profileLoading, lastUpdatedSection]);
+
+  const loadUserProfile = async (sectionId?: string) => {
     if (!user) return;
+    
+    if (sectionId) {
+      setLastUpdatedSection(sectionId);
+    }
     
     setProfileLoading(true);
     try {
@@ -73,7 +98,6 @@ const ProfilePage = () => {
         config: error.config
       });
       
-      // Show a more detailed error message
       let errorMessage = "We couldn't load your profile information. ";
       if (error.response?.status === 404) {
         errorMessage += "Your profile was not found. Creating a new profile...";
@@ -245,20 +269,18 @@ const ProfilePage = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="absolute top-4 right-4">
+      {/* <div className="absolute top-4 right-4">
         <ThemeToggle />
-      </div>
+      </div> */}
       
       <div className="container mx-auto px-4">
-        {/* Handle null profile data with a default empty object */}
         <ProfileHeader 
           profile={profile || {}} 
           uid={user?.uid || ''} 
-          refreshProfile={loadUserProfile} 
+          refreshProfile={() => loadUserProfile('header')} 
         />
         
         <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Sidebar with quick links */}
           <div className="md:col-span-1">
             <div className="sticky top-20">
               <QuickLinks className="mb-6" />
@@ -328,7 +350,6 @@ const ProfilePage = () => {
             </div>
           </div>
           
-          {/* Main content with profile sections */}
           <div className="md:col-span-3">
             {/* Password update form (if shown) */}
             {showPasswordForm && canUpdatePassword && (
@@ -404,7 +425,7 @@ const ProfilePage = () => {
                     <ProfileSummarySection 
                       profile={profile || {}} 
                       uid={user?.uid || ''} 
-                      refreshProfile={loadUserProfile} 
+                      refreshProfile={() => loadUserProfile('summary')} 
                     />
                   </div>
                   
@@ -412,7 +433,7 @@ const ProfilePage = () => {
                     <KeySkillsSection 
                       profile={profile || {}} 
                       uid={user?.uid || ''} 
-                      refreshProfile={loadUserProfile} 
+                      refreshProfile={() => loadUserProfile('skills')} 
                     />
                   </div>
                   
@@ -420,7 +441,7 @@ const ProfilePage = () => {
                     <EmploymentSection 
                       profile={profile || {}} 
                       uid={user?.uid || ''} 
-                      refreshProfile={loadUserProfile} 
+                      refreshProfile={() => loadUserProfile('employment')} 
                     />
                   </div>
                   
@@ -428,7 +449,7 @@ const ProfilePage = () => {
                     <EducationSection 
                       profile={profile || {}} 
                       uid={user?.uid || ''} 
-                      refreshProfile={loadUserProfile} 
+                      refreshProfile={() => loadUserProfile('education')} 
                     />
                   </div>
                   
@@ -436,7 +457,7 @@ const ProfilePage = () => {
                     <ProjectsSection 
                       profile={profile || {}} 
                       uid={user?.uid || ''} 
-                      refreshProfile={loadUserProfile} 
+                      refreshProfile={() => loadUserProfile('projects')} 
                     />
                   </div>
                   
@@ -444,7 +465,7 @@ const ProfilePage = () => {
                     <ResumeSection 
                       profile={profile || {}} 
                       uid={user?.uid || ''} 
-                      refreshProfile={loadUserProfile} 
+                      refreshProfile={() => loadUserProfile('resume')} 
                     />
                   </div>
                 </>
