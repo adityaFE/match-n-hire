@@ -5,6 +5,7 @@ import { UserProfile, updateUserProfile } from '@/services/profileService';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ProfilePictureUpload } from './ProfilePictureUpload';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface ProfileHeaderProps {
   profile: UserProfile;
@@ -101,18 +102,35 @@ export const ProfileHeader = ({ profile, uid, refreshProfile }: ProfileHeaderPro
 
   return (
     <div className="relative rounded-lg bg-white dark:bg-gray-800 p-6 shadow-md mb-6">
+      {/* Theme Toggle - Positioned absolutely */}
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle className="bg-white dark:bg-gray-700 shadow-md" />
+      </div>
+
       <div className="flex flex-col md:flex-row gap-6">
-        <div className="flex-shrink-0 flex flex-col items-center">
+        {/* Profile Picture and Completion Section */}
+        <div className="flex-shrink-0 flex flex-col items-center relative">
           <ProfilePictureUpload
             uid={uid}
             currentPicture={profile?.profilePicture}
             onUploadSuccess={handleProfilePictureUpdate}
           />
-          <div className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-green-500 border border-gray-200 dark:border-gray-600">
-            <span className="font-bold text-sm">{getProfileCompleteness()}%</span>
+          
+          {/* Profile Completion Indicator */}
+          <div className="mt-2 flex items-center justify-center">
+            <div className="relative w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div 
+                className="absolute left-0 top-0 h-full bg-green-500 transition-all duration-500 ease-out"
+                style={{ width: `${getProfileCompleteness()}%` }}
+              />
+            </div>
+            <span className="ml-2 text-sm font-medium text-gray-600 dark:text-gray-300">
+              {getProfileCompleteness()}%
+            </span>
           </div>
         </div>
         
+        {/* Profile Information */}
         <div className="flex-grow">
           {isEditing ? (
             <div className="space-y-4">
@@ -127,6 +145,7 @@ export const ProfileHeader = ({ profile, uid, refreshProfile }: ProfileHeaderPro
                   value={formData.fullName}
                   onChange={handleChange}
                   className="auth-input"
+                  placeholder="Enter your full name"
                 />
               </div>
               
@@ -141,6 +160,7 @@ export const ProfileHeader = ({ profile, uid, refreshProfile }: ProfileHeaderPro
                   value={formData.jobTitle}
                   onChange={handleChange}
                   className="auth-input"
+                  placeholder="e.g. Senior Software Engineer"
                 />
               </div>
               
@@ -155,6 +175,7 @@ export const ProfileHeader = ({ profile, uid, refreshProfile }: ProfileHeaderPro
                   value={formData.company}
                   onChange={handleChange}
                   className="auth-input"
+                  placeholder="Enter your company name"
                 />
               </div>
               
@@ -170,6 +191,7 @@ export const ProfileHeader = ({ profile, uid, refreshProfile }: ProfileHeaderPro
                     value={formData.location}
                     onChange={handleChange}
                     className="auth-input"
+                    placeholder="e.g. San Francisco, CA"
                   />
                 </div>
                 
@@ -204,7 +226,7 @@ export const ProfileHeader = ({ profile, uid, refreshProfile }: ProfileHeaderPro
                 />
               </div>
               
-              <div className="flex items-center justify-end space-x-2 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-2">
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -249,23 +271,23 @@ export const ProfileHeader = ({ profile, uid, refreshProfile }: ProfileHeaderPro
                 </Button>
               </div>
               
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-y-2">
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
                 {profile?.location && (
                   <div className="flex items-center text-gray-600 dark:text-gray-400">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    <span>{profile.location}</span>
+                    <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">{profile.location}</span>
                   </div>
                 )}
                 
                 {profile?.experience && (
                   <div className="flex items-center text-gray-600 dark:text-gray-400">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span>{profile.experience}</span>
+                    <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">{profile.experience}</span>
                   </div>
                 )}
               </div>
               
-              <div className="mt-4 flex justify-between items-center">
+              <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div>
                   {profile?.noticePeroid && (
                     <div className="text-gray-600 dark:text-gray-400">

@@ -125,17 +125,17 @@ export const ResumeSection = ({ profile, uid, refreshProfile }: ResumeSectionPro
 
       {profile?.resume ? (
         <div className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <FileText className="h-6 w-6 text-indigo-600 dark:text-indigo-400 mr-2" />
-              <div>
-                <p className="font-medium text-gray-800 dark:text-gray-200">{profile.resume}</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-2">
+              <FileText className="h-6 w-6 shrink-0 text-indigo-600 dark:text-indigo-400" />
+              <div className="min-w-0">
+                <p className="font-medium text-gray-800 dark:text-gray-200 break-all">{profile.resume}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Uploaded on {profile.lastUpdated ? new Date(profile.lastUpdated).toLocaleDateString() : 'Unknown date'}
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 shrink-0">
               <Button variant="ghost" size="sm" className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
                 <input 
                   type="file" 
@@ -168,7 +168,7 @@ export const ResumeSection = ({ profile, uid, refreshProfile }: ResumeSectionPro
       ) : (
         <div className="mb-6 p-6 border border-dashed border-gray-300 dark:border-gray-700 rounded-md flex flex-col items-center justify-center">
           <FileText className="h-12 w-12 text-gray-400 mb-2" />
-          <p className="mb-2 text-sm text-gray-600 dark:text-gray-400">Upload your resume (PDF, DOC, DOCX) up to 2MB</p>
+          <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 text-center">Upload your resume (PDF, DOC, DOCX) up to 2MB</p>
           <Button>
             <input 
               type="file" 
@@ -214,7 +214,7 @@ export const ResumeSection = ({ profile, uid, refreshProfile }: ResumeSectionPro
               placeholder="A brief headline describing your professional background and expertise"
             />
             
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end gap-2">
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -242,7 +242,7 @@ export const ResumeSection = ({ profile, uid, refreshProfile }: ResumeSectionPro
             </div>
           </div>
         ) : (
-          <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+          <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words">
             {profile?.resumeHeadline || 'Add a resume headline to highlight your expertise and experience.'}
           </p>
         )}

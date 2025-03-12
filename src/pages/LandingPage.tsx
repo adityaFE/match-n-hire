@@ -6,12 +6,15 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-600 to-purple-600 dark:from-indigo-900 dark:to-purple-900 p-4 relative">
-      <div className="fixed top-4 right-4 z-50">
-        <ThemeToggle />
+      {/* Header with theme toggle */}
+      <div className="absolute top-0 right-0 p-4">
+        <ThemeToggle className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border-0" />
       </div>
       
       <div className="max-w-4xl w-full text-center text-white">
-        <h1 className="text-6xl font-bold mb-6">Match'n'Hire</h1>
+        <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-bold mb-6 break-words tracking-tight">
+          Match'n'Hire
+        </h1>
         
         <div className="mb-12">
           <p className="text-xl mb-2">
@@ -22,7 +25,7 @@ const LandingPage = () => {
           </p>
         </div>
         
-        <div className="flex justify-center gap-4 mb-16">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
           <button 
             onClick={() => navigate('/login')} 
             className="px-8 py-3 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 transition-colors dark:bg-blue-600 dark:hover:bg-blue-700"
