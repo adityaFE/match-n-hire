@@ -90,7 +90,13 @@ export default {
 			backgroundImage: {
 				'auth-gradient': 'linear-gradient(to bottom right, #4f46e5, #9333ea)',
 			}
-		}
+		},
+		screens: {
+			sm: "640px", // Small
+			md: "768px", // Medium (should be 768px)
+			lg: "1024px", // Large
+			xl: "1280px", // Extra Large
+		  }
 	},
 	plugins: [animate],
 } satisfies Config;
