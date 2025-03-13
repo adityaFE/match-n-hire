@@ -251,7 +251,7 @@ export const ProfileHeader = ({ profile, uid, refreshProfile }: ProfileHeaderPro
             </div>
           ) : (
             <>
-              <div className="flex justify-between items-start">
+              {/* <div className="flex justify-between items-start">
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {profile?.fullName || 'Add Your Name'}
@@ -269,6 +269,32 @@ export const ProfileHeader = ({ profile, uid, refreshProfile }: ProfileHeaderPro
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
+              </div> */}
+              <div className="flex justify-between items-center">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {profile?.fullName || 'Add Your Name'}
+                  </h1>
+                    <p className="text-lg text-gray-600 dark:text-gray-400">
+                      {profile?.jobTitle || 'Add Job Title'} 
+                      {profile?.company && <span> at {profile.company}</span>}
+                    </p>
+                </div>
+                <div className="pr-0 pb-0 md:pr-[34px!important] md:pb-[24px!important] flex items-center gap-4"
+                // style={{
+                //   paddingRight:"34px",
+                //   paddingBottom:"28px"
+                // }}
+                >
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setIsEditing(true)}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  >
+                  <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4">
