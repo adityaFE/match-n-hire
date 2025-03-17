@@ -91,6 +91,7 @@ const PORT = process.env.PORT || 5002;
 const allowedOrigins = [
   'http://localhost:5173',  // Vite default port
   'http://localhost:8082',
+  'http://localhost:8080',
   'http://localhost:3000',
   'https://match-n-hire.netlify.app',  // Production Netlify frontend
   'https://job-tinder.onrender.com',  // Render backend

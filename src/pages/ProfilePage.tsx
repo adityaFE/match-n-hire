@@ -421,6 +421,13 @@ const ProfilePage = () => {
                 </div>
               ) : (
                 <>
+                  <div ref={resumeRef} id="resume">
+                    <ResumeSection 
+                      profile={profile || {}} 
+                      uid={user?.uid || ''} 
+                      refreshProfile={() => loadUserProfile('resume')} 
+                    />
+                  </div>
                   <div ref={summaryRef} id="profile-summary">
                     <ProfileSummarySection 
                       profile={profile || {}} 
@@ -459,15 +466,7 @@ const ProfilePage = () => {
                       uid={user?.uid || ''} 
                       refreshProfile={() => loadUserProfile('projects')} 
                     />
-                  </div>
-                  
-                  <div ref={resumeRef} id="resume">
-                    <ResumeSection 
-                      profile={profile || {}} 
-                      uid={user?.uid || ''} 
-                      refreshProfile={() => loadUserProfile('resume')} 
-                    />
-                  </div>
+                  </div>                
                 </>
               )}
             </div>

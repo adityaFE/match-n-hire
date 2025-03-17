@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, Trash2 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { useToast } from '@/hooks/use-toast';
-import { updateUserProfile } from '@/services/profileService';
+import { getUserProfile, updateUserProfile } from '@/services/profileService';
 
 interface ProfilePictureUploadProps {
   uid: string;
@@ -68,6 +68,37 @@ export const ProfilePictureUpload = ({ uid, currentPicture, onUploadSuccess }: P
     }
   };
 
+  const handleDelete = async () => {
+    if (!currentPicture) return;
+    
+    setLoading(true);
+    try {
+      const currentProfile = await getUserProfile(uid);
+      
+      await updateUserProfile(uid, {
+        ...currentProfile,
+        profilePicture: null,
+        lastUpdated: new Date()
+      });
+      
+      onUploadSuccess(''); 
+      
+      toast({
+        title: "Profile picture deleted",
+        description: "Your profile picture has been deleted successfully."
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Failed to delete profile picture. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="relative group">
       <input
@@ -89,6 +120,17 @@ export const ProfilePictureUpload = ({ uid, currentPicture, onUploadSuccess }: P
           <Camera className="h-6 w-6 text-white" />
         )}
       </label>
+
+      {currentPicture && (
+        <button
+          onClick={handleDelete}
+          disabled={loading}
+          className="absolute -top-2 -right-2 p-1 bg-red-500 hover:bg-red-600 rounded-full text-white z-20 opacity-0 group-hover:opacity-100 transition-opacity"
+          type="button"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
       
       <div className="relative h-24 w-24 md:h-32 md:w-32">
         <div className="absolute inset-0 rounded-full bg-gradient-to-br from-green-400 to-green-600 animate-pulse" />
